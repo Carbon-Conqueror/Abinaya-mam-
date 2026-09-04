@@ -21,6 +21,7 @@
     --cream: #fff7e8;
     --ink: #2a0505;
     --ease-ceremony: cubic-bezier(.65,0,.35,1);
+    --cut-ease: cubic-bezier(.55,.05,.4,1);
   }
 
   *{box-sizing:border-box;}
@@ -53,31 +54,65 @@
       radial-gradient(circle at 50% 0%, #fffdf6 0%, var(--cream) 60%),
       var(--cream);
   }
-  #site .site-emblem{
+  #site .site-mark{
+    position:absolute;
+    top:26px;
+    left:50%;
+    transform:translateX(-50%);
+    font-family:'Playfair Display', serif;
+    font-weight:700;
+    letter-spacing:.06em;
+    font-size:.95rem;
+    text-transform:uppercase;
+    color:var(--crimson);
+    opacity:.7;
+  }
+  #site .site-mark span{ color:var(--gold); }
+  .tribute-final{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:.9em;
+    max-width:38em;
+    margin:0 auto 1.8em;
+  }
+  .tribute-line1{
+    font-size:clamp(1.25rem,3.2vw,1.85rem);
+    font-style:italic;
+    line-height:1.55;
+    color:#5a2323;
+    margin:0;
+  }
+  .tribute-line2{
+    font-family:'Playfair Display', serif;
+    font-weight:700;
+    font-size:clamp(1.7rem,5vw,2.6rem);
+    color:var(--crimson);
+    margin:0;
+  }
+  .tribute-line3{
     font-family:'Playfair Display', serif;
     font-weight:900;
-    font-size:clamp(2.4rem,7vw,4.5rem);
-    color:var(--crimson);
-    letter-spacing:.02em;
-    margin:0 0 .3em;
+    font-style:italic;
+    font-size:clamp(1.5rem,4.4vw,2.2rem);
+    background:linear-gradient(180deg, #c79a2c 0%, var(--gold) 55%, #9c7523 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    margin:0;
   }
-  #site .site-emblem span{ color:var(--gold); }
-  #site p{
-    font-size:clamp(1.1rem,2.4vw,1.5rem);
-    max-width:42em;
-    line-height:1.6;
-    color:#5a2323;
-    margin:0 0 1.6em;
-  }
+  .tribute-line3 .heart{ -webkit-text-fill-color:initial; }
   #site .site-cta{
     display:inline-block;
-    padding:.85em 2.4em;
+    margin-top:.6em;
+    padding:.75em 2.1em;
     border-radius:999px;
     background:linear-gradient(135deg,var(--crimson),var(--crimson-light));
     color:var(--gold-bright);
     text-decoration:none;
     font-family:'Playfair Display', serif;
     font-weight:700;
+    font-size:.95rem;
     letter-spacing:.04em;
     box-shadow:0 10px 30px -8px rgba(110,13,13,.55);
     transition:transform .25s ease, box-shadow .25s ease;
@@ -85,12 +120,6 @@
   #site .site-cta:hover, #site .site-cta:focus-visible{
     transform:translateY(-2px);
     box-shadow:0 14px 34px -8px rgba(110,13,13,.65);
-  }
-  #site .site-footnote{
-    margin-top:2.2em;
-    font-size:.95rem;
-    color:#8a6a4a;
-    font-style:italic;
   }
 
   /* ============ Ceremony overlay ============ */
@@ -132,19 +161,14 @@
     width:120px;
     background:radial-gradient(ellipse at center, rgba(0,0,0,.5), transparent 70%);
   }
-  .curtain-left{ left:0; transform:translateX(0); }
-  .curtain-right{ right:0; transform:translateX(0); }
+  .curtain-left{ left:0; transform:translateX(0); border-right:3px solid var(--gold); }
+  .curtain-right{ right:0; transform:translateX(0); border-left:3px solid var(--gold); }
   .curtain-left::before{ right:-40px; }
   .curtain-right::before{ left:-40px; }
-
-  /* Golden trim where curtains meet */
-  .curtain-left{ border-right:3px solid var(--gold); }
-  .curtain-right{ border-left:3px solid var(--gold); }
 
   #ceremony.opening .curtain-left{ transform:translateX(-102%); }
   #ceremony.opening .curtain-right{ transform:translateX(102%); }
 
-  /* Soft ambient vignette + spotlight over the whole ceremony */
   .ceremony-vignette{
     position:absolute; inset:0;
     pointer-events:none;
@@ -154,19 +178,15 @@
     z-index:2;
   }
 
-  /* Ceremony content */
+  /* Ceremony content: deliberately wordless — visuals + interaction only */
   .ceremony-content{
     position:relative;
     z-index:3;
     min-height:100%;
     display:flex;
-    flex-direction:column;
     align-items:center;
     justify-content:center;
-    text-align:center;
     padding:6vh 6vw;
-    overflow-y:auto;
-    max-height:100vh;
     transition:opacity .6s ease, transform .6s ease;
   }
   #ceremony.opening .ceremony-content{
@@ -175,208 +195,99 @@
     pointer-events:none;
   }
 
-  /* Loading state */
-  .loading-state{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:1.1em;
-    color:var(--gold-light);
-    transition:opacity .5s ease;
-  }
-  .loading-state[hidden]{ display:none; }
   .loading-ring{
     width:46px; height:46px;
     border-radius:50%;
     border:3px solid rgba(212,175,55,.25);
     border-top-color:var(--gold);
     animation:spin 1s linear infinite;
+    transition:opacity .4s ease;
   }
-  .loading-state p{
-    font-family:'Playfair Display', serif;
-    letter-spacing:.18em;
-    text-transform:uppercase;
-    font-size:.8rem;
-    font-weight:500;
-    margin:0;
-  }
+  .loading-ring[hidden]{ display:none; }
   @keyframes spin{ to{ transform:rotate(360deg); } }
 
-  .ceremony-main{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    max-width:640px;
-  }
-  .ceremony-main[hidden]{ display:none; }
-  .fade-up{
-    opacity:0;
-    transform:translateY(18px);
-    animation:fadeUp .9s var(--ease-ceremony) forwards;
-  }
-  @keyframes fadeUp{ to{ opacity:1; transform:translateY(0); } }
-
-  .kicker{
-    font-family:'Playfair Display', serif;
-    font-style:italic;
-    font-weight:500;
-    color:var(--gold-light);
-    font-size:clamp(1rem,2.6vw,1.3rem);
-    letter-spacing:.04em;
-    margin:0 0 .5em;
-    animation-delay:.05s;
-  }
-  .brand{
-    font-family:'Playfair Display', serif;
-    font-weight:900;
-    font-size:clamp(3rem,11vw,6rem);
-    line-height:1;
-    margin:0 0 .18em;
-    letter-spacing:.01em;
-    background:linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 55%, #b6862a 100%);
-    -webkit-background-clip:text;
-    background-clip:text;
-    color:transparent;
-    text-shadow:0 2px 24px rgba(212,175,55,.35);
-    animation-delay:.2s;
-  }
-  .tagline{
-    color:var(--cream);
-    font-size:clamp(1rem,2.6vw,1.25rem);
-    font-style:italic;
-    opacity:.9;
-    margin:0 0 1.4em;
-    animation-delay:.35s;
-  }
-  .divider{
-    width:64px; height:2px;
-    background:linear-gradient(90deg, transparent, var(--gold), transparent);
-    margin:0 0 1.4em;
-    animation-delay:.42s;
-  }
-  .heartfelt{
-    color:var(--cream);
-    font-size:clamp(1.02rem,2.4vw,1.28rem);
-    line-height:1.65;
-    max-width:34em;
-    margin:0 0 1em;
-    animation-delay:.5s;
-  }
-  .teachers-day{
-    font-family:'Playfair Display', serif;
-    font-weight:700;
-    font-style:italic;
-    font-size:clamp(1.2rem,3vw,1.6rem);
-    color:var(--gold-bright);
-    margin:0 0 2.1em;
-    animation-delay:.62s;
-  }
-
-  /* Ribbon + scissors */
-  .ribbon-stage{
-    position:relative;
-    width:min(460px,80vw);
-    height:96px;
-    margin:0 0 2.1em;
+  .ceremony-stage{
     display:flex;
     align-items:center;
     justify-content:center;
-    animation-delay:.75s;
-  }
-  .ribbon-half{
-    position:absolute;
-    top:50%;
-    width:calc(50% - 2px);
-    height:58px;
-    transform:translateY(-50%);
-    background:linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 45%, #a97e1f 100%);
-    box-shadow:0 8px 22px -6px rgba(0,0,0,.45), inset 0 2px 4px rgba(255,255,255,.5);
-    transition:transform .55s var(--ease-ceremony), opacity .5s ease .1s;
-  }
-  .ribbon-left{
-    left:0;
-    border-radius:6px 0 0 6px;
-    clip-path:polygon(0 0, 100% 0, 88% 50%, 100% 100%, 0 100%);
-  }
-  .ribbon-right{
-    right:0;
-    border-radius:0 6px 6px 0;
-    clip-path:polygon(12% 50%, 0 0, 100% 0, 100% 100%, 0 100%);
-  }
-  .ribbon-shine{
-    position:absolute; inset:8px 10%;
-    background:linear-gradient(180deg, rgba(255,255,255,.55), transparent 60%);
-    pointer-events:none;
-    opacity:.5;
-  }
-  #ceremony.cutting .ribbon-left{
-    transform:translate(-46px,26px) rotate(-16deg);
+    animation:stageFadeIn .8s var(--ease-ceremony) forwards;
     opacity:0;
   }
-  #ceremony.cutting .ribbon-right{
-    transform:translate(46px,26px) rotate(16deg);
-    opacity:0;
+  .ceremony-stage[hidden]{ display:none; }
+  @keyframes stageFadeIn{ to{ opacity:1; } }
+
+  /* ---- Ribbon + real floating scissors (single synced SVG) ---- */
+  .ribbon-rig{
+    width:min(520px,88vw);
+    height:auto;
+    filter:drop-shadow(0 14px 26px rgba(0,0,0,.5));
+    overflow:visible;
+  }
+  .glow-pulse{
+    animation:pulseGlow 2.4s ease-in-out infinite;
+    transform-origin:230px 58px;
+  }
+  @keyframes pulseGlow{
+    0%,100%{ opacity:.35; transform:scale(1); }
+    50%{ opacity:.75; transform:scale(1.18); }
   }
 
-  .scissors{
-    position:relative;
-    z-index:4;
-    font-size:clamp(2.1rem,6vw,2.8rem);
-    filter:drop-shadow(0 6px 10px rgba(0,0,0,.5));
-    transform-origin:70% 30%;
-    animation:idleSnip 1.5s ease-in-out infinite;
+  .ribbon-left, .ribbon-right, .ribbon-knot{
+    transition:transform .6s ease, opacity .5s ease .08s;
   }
-  @keyframes idleSnip{
-    0%,100%{ transform:rotate(-10deg); }
-    50%{ transform:rotate(8deg); }
-  }
-  #ceremony.cutting .scissors{
-    animation:snipCut .65s var(--ease-ceremony) forwards;
-  }
-  @keyframes snipCut{
-    0%{ transform:rotate(-10deg) scale(1); }
-    28%{ transform:rotate(38deg) scale(1.08); }
-    55%{ transform:rotate(-30deg) scale(1.05); }
-    78%{ transform:rotate(14deg) scale(1); }
-    100%{ transform:rotate(2deg) scale(.7); opacity:0; }
-  }
+  .ribbon-left{ transform-origin:226px 60px; }
+  .ribbon-right{ transform-origin:234px 60px; }
+  .ribbon-knot{ transform-origin:230px 61px; }
+  #ceremony.cutting .ribbon-left{ transform:translate(-32px,30px) rotate(-16deg); opacity:0; }
+  #ceremony.cutting .ribbon-right{ transform:translate(32px,30px) rotate(16deg); opacity:0; }
+  #ceremony.cutting .ribbon-knot{ transform:scale(.3); opacity:0; }
 
-  /* CTA button */
-  .open-btn{
-    animation-delay:.9s;
-    font-family:'Playfair Display', serif;
-    font-weight:700;
-    font-size:clamp(1rem,2.6vw,1.2rem);
-    letter-spacing:.06em;
-    color:var(--ink);
-    background:linear-gradient(180deg, var(--gold-bright), var(--gold) 60%, #c79a2c 100%);
-    border:1px solid rgba(255,255,255,.5);
-    padding:.95em 2.6em;
-    border-radius:999px;
+  .scissor-hit{
     cursor:pointer;
-    box-shadow:0 12px 32px -8px rgba(0,0,0,.55), 0 0 0 rgba(255,233,176,0);
-    transition:transform .25s ease, box-shadow .3s ease, opacity .3s ease;
+    display:block;
+    background:none;
+    border:none;
+    padding:0;
+    margin:0;
+    -webkit-tap-highlight-color:transparent;
   }
-  .open-btn:hover{
-    transform:translateY(-2px);
-    box-shadow:0 16px 36px -8px rgba(0,0,0,.6), 0 0 28px rgba(255,233,176,.45);
+  .scissor-hit:focus-visible ~ .glow-pulse,
+  .scissor-hit:focus-visible{
+    outline:none;
   }
-  .open-btn:focus-visible{
-    outline:3px solid var(--gold-bright);
-    outline-offset:3px;
+  .scissor-hit:focus-visible + .scissor-rig .glow-pulse{
+    opacity:1;
   }
-  .open-btn:active{ transform:translateY(0) scale(.98); }
-  .open-btn:disabled{ cursor:default; opacity:.7; }
 
-  .status-line{
-    margin-top:1.1em;
-    font-size:.85rem;
-    letter-spacing:.08em;
-    text-transform:uppercase;
-    color:var(--gold-light);
-    opacity:.75;
-    animation-delay:1.05s;
+  .scissor-float{
+    animation:floatHover 2.6s ease-in-out infinite;
+    transform-origin:0 0;
   }
+  .scissor-rig.settled .scissor-float{
+    animation:none;
+  }
+  @keyframes floatHover{
+    0%,100%{ transform:translateY(0) rotate(-2deg); }
+    50%{ transform:translateY(-9px) rotate(2deg); }
+  }
+
+  .scissor-descend{
+    transform:translateY(0);
+    transform-origin:0 0;
+    transition:transform .85s var(--cut-ease);
+  }
+  .scissor-rig.active .scissor-descend{
+    transform:translateY(103px);
+  }
+
+  .blade{
+    transform-origin:0 0;
+    transition:transform .85s var(--cut-ease);
+  }
+  .blade-left{ transform:rotate(-20deg); }
+  .blade-right{ transform:rotate(20deg); }
+  #ceremony .scissor-rig.active .blade-left{ transform:rotate(-3deg); }
+  #ceremony .scissor-rig.active .blade-right{ transform:rotate(3deg); }
 
   /* Confetti */
   #confetti-container{
@@ -403,17 +314,12 @@
 
   /* Reduced motion */
   @media (prefers-reduced-motion: reduce){
-    .curtain, .ceremony-content, .ribbon-half, .scissors, .fade-up, .open-btn{
+    .curtain, .ceremony-content, .ribbon-left, .ribbon-right, .ribbon-knot,
+    .scissor-descend, .blade, .ceremony-stage, .scissor-float{
       transition-duration:.01ms !important;
       animation-duration:.01ms !important;
       animation-iteration-count:1 !important;
     }
-  }
-
-  @media (max-width:520px){
-    .ceremony-content{ padding:5vh 5vw; }
-    .ribbon-stage{ height:78px; }
-    .ribbon-half{ height:46px; }
   }
 </style>
 </head>
@@ -421,51 +327,88 @@
 
   <!-- ============ The AbiLearn site, revealed once the ribbon is cut ============ -->
   <main id="site" aria-hidden="true">
-    <h1 class="site-emblem">Abi<span>Learn</span></h1>
-    <p>
-      AbiLearn is now officially open — inaugurated on Teacher's Day in honor of
-      the teacher who inspires, guides, and believes in us. Thank you, Abi Mam.
-    </p>
+    <p class="site-mark">Abi<span>Learn</span></p>
+    <div class="tribute-final">
+      <p class="tribute-line1">It is my greatest tribute to you mam in my last year of school.</p>
+      <p class="tribute-line2">Happy Teacher's Day Mam</p>
+      <p class="tribute-line3">Abi Mam Forever <span class="heart">❤️</span></p>
+    </div>
     <a class="site-cta" id="siteEnterLink" href="#" rel="noopener">Enter AbiLearn →</a>
-    <p class="site-footnote">Replace <code>ABILEARN_URL</code> in the script below with your live website link.</p>
   </main>
 
-  <!-- ============ Grand opening ceremony overlay ============ -->
+  <!-- ============ Grand opening ceremony overlay (intentionally wordless) ============ -->
   <div id="ceremony" role="dialog" aria-modal="true" aria-label="AbiLearn Teacher's Day grand opening ceremony">
     <div class="curtain curtain-left" aria-hidden="true"></div>
     <div class="curtain curtain-right" aria-hidden="true"></div>
     <div class="ceremony-vignette" aria-hidden="true"></div>
 
     <div class="ceremony-content">
+      <div class="loading-ring" id="loadingRing" role="status" aria-label="Preparing the ceremony"></div>
 
-      <div class="loading-state" id="loadingState">
-        <div class="loading-ring" aria-hidden="true"></div>
-        <p>Preparing the ceremony…</p>
-      </div>
+      <div class="ceremony-stage" id="ceremonyStage" hidden>
+        <button type="button" class="scissor-hit" id="openBtn"
+                aria-label="Cut the ribbon to open AbiLearn">
+          <svg class="ribbon-rig" viewBox="0 0 460 210" preserveAspectRatio="xMidYMid meet" focusable="false">
+            <defs>
+              <linearGradient id="ribbonGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ffedb0"/>
+                <stop offset="45%" stop-color="#d4af37"/>
+                <stop offset="100%" stop-color="#8a651c"/>
+              </linearGradient>
+              <radialGradient id="knotGrad" cx="35%" cy="35%" r="70%">
+                <stop offset="0%" stop-color="#fff6da"/>
+                <stop offset="60%" stop-color="#d4af37"/>
+                <stop offset="100%" stop-color="#7a5a17"/>
+              </radialGradient>
+              <linearGradient id="bladeGrad" x1="0" y1="1" x2="0" y2="0">
+                <stop offset="0%" stop-color="#8f98a3"/>
+                <stop offset="55%" stop-color="#d8dee5"/>
+                <stop offset="100%" stop-color="#f6f8fa"/>
+              </linearGradient>
+              <radialGradient id="pivotGrad" cx="35%" cy="35%" r="70%">
+                <stop offset="0%" stop-color="#fff6da"/>
+                <stop offset="100%" stop-color="#b6862a"/>
+              </radialGradient>
+              <linearGradient id="handleGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ffedb0"/>
+                <stop offset="100%" stop-color="#b6862a"/>
+              </linearGradient>
+              <radialGradient id="glowGrad" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#ffedb0" stop-opacity=".9"/>
+                <stop offset="100%" stop-color="#ffedb0" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
 
-      <div class="ceremony-main" id="ceremonyMain" hidden>
-        <p class="kicker fade-up">✦ A Special Tribute to Abi Mam ❤️ ✦</p>
-        <h1 class="brand fade-up">AbiLearn</h1>
-        <p class="tagline fade-up">Made with gratitude, respect &amp; love for my teacher.</p>
-        <div class="divider fade-up" aria-hidden="true"></div>
+            <!-- Ceremonial ribbon, gently sagging like a real strung ribbon -->
+            <path class="ribbon-left" d="M0,50 C110,18 168,18 226,50 L226,74 C168,42 110,42 0,74 Z" fill="url(#ribbonGrad)"/>
+            <path class="ribbon-right" d="M460,50 C350,18 292,18 234,50 L234,74 C292,42 350,42 460,74 Z" fill="url(#ribbonGrad)"/>
+            <circle class="ribbon-knot" cx="230" cy="62" r="17" fill="url(#knotGrad)" stroke="#7a5a17" stroke-width="1"/>
 
-        <p class="heartfelt fade-up">
-          For the teacher who inspires, guides, and believes in us —
-          this little creation is my way of saying Thank You.
-        </p>
-        <p class="teachers-day fade-up">Happy Teacher's Day, Abi Mam! ❤️</p>
+            <!-- Glow affordance showing the scissors are interactive -->
+            <circle class="glow-pulse" cx="230" cy="58" r="46" fill="url(#glowGrad)"/>
 
-        <div class="ribbon-stage fade-up" aria-hidden="true">
-          <div class="ribbon-half ribbon-left"><div class="ribbon-shine"></div></div>
-          <div class="ribbon-half ribbon-right"><div class="ribbon-shine"></div></div>
-          <span class="scissors" id="scissors">✂️</span>
-        </div>
-
-        <button type="button" class="open-btn fade-up" id="openBtn"
-                aria-label="Cut the ribbon and open the AbiLearn website">
-          ✂️ OPEN ABILEARN
+            <!-- Real floating ceremonial scissors, hovering above the ribbon -->
+            <g class="scissor-rig" id="scissorRig" transform="translate(230,58)">
+              <g class="scissor-float">
+                <g class="scissor-descend" id="scissorDescend">
+                  <path class="handle" fill="url(#handleGrad)" fill-rule="evenodd"
+                        d="M -32,10 a20,26 0 1,0 40,0 a20,26 0 1,0 -40,0 M -24,10 a12,16 0 1,0 24,0 a12,16 0 1,0 -24,0"/>
+                  <path class="handle" fill="url(#handleGrad)" fill-rule="evenodd"
+                        d="M 12,10 a20,26 0 1,0 40,0 a20,26 0 1,0 -40,0 M 20,10 a12,16 0 1,0 24,0 a12,16 0 1,0 -24,0"/>
+                  <g class="blade blade-left">
+                    <path fill="url(#bladeGrad)" stroke="#6b7480" stroke-width=".6"
+                          d="M0,0 L-9,-6 C-13,-26 -10,-54 -3,-76 L3,-76 C7,-52 8,-26 6,-6 Z"/>
+                  </g>
+                  <g class="blade blade-right">
+                    <path fill="url(#bladeGrad)" stroke="#6b7480" stroke-width=".6"
+                          d="M0,0 L-6,-6 C-8,-26 -7,-52 -3,-76 L3,-76 C9,-54 12,-26 9,-6 Z"/>
+                  </g>
+                  <circle class="pivot" cx="0" cy="0" r="6.5" fill="url(#pivotGrad)" stroke="#7a5a17" stroke-width="1"/>
+                </g>
+              </g>
+            </g>
+          </svg>
         </button>
-        <p class="status-line fade-up" id="statusLine" aria-live="polite">Press Enter or click to begin</p>
       </div>
     </div>
 
@@ -480,18 +423,18 @@
 
   // ---------------------------------------------------------------------
   // Replace this with your real AbiLearn website URL. Leave it as "" to
-  // simply reveal the built-in AbiLearn landing section instead of
+  // simply reveal the built-in AbiLearn tribute page instead of
   // redirecting away.
   // ---------------------------------------------------------------------
   const ABILEARN_URL = "";
 
   const htmlEl = document.documentElement;
   const ceremony = document.getElementById('ceremony');
-  const loadingState = document.getElementById('loadingState');
-  const ceremonyMain = document.getElementById('ceremonyMain');
+  const loadingRing = document.getElementById('loadingRing');
+  const ceremonyStage = document.getElementById('ceremonyStage');
   const openBtn = document.getElementById('openBtn');
-  const scissors = document.getElementById('scissors');
-  const statusLine = document.getElementById('statusLine');
+  const scissorRig = document.getElementById('scissorRig');
+  const scissorDescend = document.getElementById('scissorDescend');
   const announcer = document.getElementById('ceremonyAnnouncer');
   const confettiContainer = document.getElementById('confetti-container');
   const site = document.getElementById('site');
@@ -509,12 +452,12 @@
 
   let opened = false;
 
-  // ---- Intentional "loading" beat before the ceremony reveals itself ----
+  // ---- Intentional "loading" beat before the ribbon & scissors appear ----
   window.setTimeout(() => {
-    loadingState.hidden = true;
-    ceremonyMain.hidden = false;
+    loadingRing.hidden = true;
+    ceremonyStage.hidden = false;
     openBtn.focus();
-  }, reduceMotion ? 50 : 1300);
+  }, reduceMotion ? 50 : 1200);
 
   // ---- Golden confetti burst ----
   function launchConfetti() {
@@ -535,29 +478,43 @@
     }
   }
 
-  // ---- The grand opening sequence ----
+  // ---- The scissors physically descend; the ribbon cuts the instant they arrive ----
   function openCeremony() {
     if (opened) return;
     opened = true;
 
     openBtn.disabled = true;
-    statusLine.textContent = 'Cutting the ribbon…';
-    announcer.textContent = 'Cutting the ribbon…';
+    announcer.textContent = 'The scissors are descending toward the ribbon…';
 
-    ceremony.classList.add('cutting');
+    // Stop the idle hover so the descent is a single clean motion.
+    scissorRig.classList.add('settled');
+    // Force reflow so removing the float animation takes effect before we start the descent.
+    void scissorRig.offsetWidth;
+    scissorRig.classList.add('active');
 
-    const ribbonCutDelay = reduceMotion ? 0 : 550;
-    const curtainOpenDuration = reduceMotion ? 50 : 1650;
+    let cutFired = false;
+    const triggerCut = () => {
+      if (cutFired) return;
+      cutFired = true;
+      ceremony.classList.add('cutting');
+      announcer.textContent = 'The ribbon is cut — AbiLearn is opening…';
 
-    window.setTimeout(() => {
-      ceremony.classList.add('opening');
-      launchConfetti();
-      announcer.textContent = 'AbiLearn is opening…';
-    }, ribbonCutDelay);
+      window.setTimeout(() => {
+        ceremony.classList.add('opening');
+        launchConfetti();
+      }, reduceMotion ? 0 : 480);
 
-    window.setTimeout(() => {
-      finishCeremony();
-    }, ribbonCutDelay + curtainOpenDuration);
+      window.setTimeout(finishCeremony, reduceMotion ? 50 : 480 + 1650);
+    };
+
+    // The cut fires automatically the instant the scissors' blades reach the ribbon.
+    scissorDescend.addEventListener('transitionend', function handler(e) {
+      if (e.propertyName !== 'transform') return;
+      scissorDescend.removeEventListener('transitionend', handler);
+      triggerCut();
+    });
+    // Safety net in case the transitionend event doesn't fire in some browser context.
+    window.setTimeout(triggerCut, reduceMotion ? 60 : 950);
   }
 
   function finishCeremony() {
@@ -569,7 +526,7 @@
     site.setAttribute('tabindex', '-1');
     site.focus();
 
-    announcer.textContent = 'AbiLearn is now open. Happy Teacher\'s Day, Abi Mam!';
+    announcer.textContent = "AbiLearn is now open. Happy Teacher's Day, Abi Mam!";
 
     if (ABILEARN_URL) {
       window.setTimeout(() => {
@@ -580,11 +537,11 @@
 
   openBtn.addEventListener('click', openCeremony);
 
-  // Extra keyboard support: Enter anywhere triggers the opening while
-  // the ceremony is active (in addition to the button's native support).
+  // Extra keyboard support: Enter/Space activate the button natively;
+  // Enter anywhere on the page also triggers the ceremony while it's active.
   document.addEventListener('keydown', (e) => {
     if (opened) return;
-    if ((e.key === 'Enter') && !ceremony.hasAttribute('hidden')) {
+    if (e.key === 'Enter' && !ceremony.hasAttribute('hidden') && document.activeElement !== openBtn) {
       openCeremony();
     }
   });
