@@ -7,7 +7,7 @@
 <meta name="description" content="A ceremonial Teacher's Day grand opening of AbiLearn, dedicated to Abi Mam.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,600;1,900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500;1,600&display=swap" rel="stylesheet">
 <style>
   /* ============ Design tokens ============ */
   :root{
@@ -22,6 +22,15 @@
     --ink: #2a0505;
     --ease-ceremony: cubic-bezier(.65,0,.35,1);
     --cut-ease: cubic-bezier(.55,.05,.4,1);
+
+    /* Page-two "tribute plaque" theme — deliberately distinct from the red ceremony */
+    --plaque-bg-1: #fffaf0;
+    --plaque-bg-2: #f6e9c8;
+    --plaque-bg-3: #efdcae;
+    --burgundy: #7a1428;
+    --burgundy-deep: #4a0d18;
+    --gold2: #b8862a;
+    --gold2-bright: #f0d78c;
   }
 
   *{box-sizing:border-box;}
@@ -41,88 +50,190 @@
     overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
   }
 
-  /* ============ Revealed AbiLearn site (underneath the ceremony) ============ */
+  /* ============================================================
+     PAGE TWO — the AbiLearn tribute plaque, revealed after the cut
+     ============================================================ */
   #site{
+    position:relative;
     min-height:100vh;
     display:flex;
-    flex-direction:column;
     align-items:center;
     justify-content:center;
     text-align:center;
-    padding:8vh 6vw;
+    padding:6vh 5vw;
+    overflow:hidden;
     background:
-      radial-gradient(circle at 50% 0%, #fffdf6 0%, var(--cream) 60%),
-      var(--cream);
+      radial-gradient(ellipse 70% 55% at 50% 8%, #ffffff 0%, var(--plaque-bg-1) 45%, var(--plaque-bg-2) 78%, var(--plaque-bg-3) 100%);
   }
-  #site .site-mark{
+  #site::before{
+    content:"";
+    position:absolute; inset:0;
+    pointer-events:none;
+    opacity:.5;
+    background-image:
+      repeating-linear-gradient(115deg, rgba(184,134,42,.05) 0 2px, transparent 2px 42px),
+      repeating-linear-gradient(25deg, rgba(122,20,40,.035) 0 2px, transparent 2px 46px);
+  }
+  #site-sparkles{
+    position:absolute; inset:0;
+    z-index:1;
+    pointer-events:none;
+    overflow:hidden;
+  }
+  .site-ember{
     position:absolute;
-    top:26px;
-    left:50%;
-    transform:translateX(-50%);
+    bottom:-4%;
+    border-radius:50%;
+    background:radial-gradient(circle, var(--gold2-bright), var(--gold2) 70%, transparent 100%);
+    opacity:0;
+    animation-name:emberRise;
+    animation-timing-function:ease-out;
+    animation-fill-mode:forwards;
+  }
+  @keyframes emberRise{
+    0%{ opacity:0; transform:translateY(0) scale(.6); }
+    12%{ opacity:.85; }
+    100%{ opacity:0; transform:translateY(-92vh) scale(1.1); }
+  }
+
+  .tribute-card{
+    position:relative;
+    z-index:2;
+    max-width:44em;
+    padding:clamp(2.2rem,6vw,4.2rem) clamp(1.6rem,7vw,4.5rem);
+    border:1.5px solid rgba(184,134,42,.55);
+    border-radius:22px;
+    background:rgba(255,253,246,.5);
+    backdrop-filter:blur(2px);
+    box-shadow:
+      0 30px 70px -30px rgba(74,13,24,.35),
+      inset 0 0 0 7px rgba(255,255,255,.45),
+      inset 0 0 0 8px rgba(184,134,42,.18);
+  }
+  .plaque-corner{
+    position:absolute;
+    width:30px; height:30px;
+    border:2px solid var(--gold2);
+    opacity:.85;
+  }
+  .plaque-corner.tl{ top:-1px; left:-1px; border-right:none; border-bottom:none; border-radius:10px 0 0 0; }
+  .plaque-corner.tr{ top:-1px; right:-1px; border-left:none; border-bottom:none; border-radius:0 10px 0 0; }
+  .plaque-corner.bl{ bottom:-1px; left:-1px; border-right:none; border-top:none; border-radius:0 0 0 10px; }
+  .plaque-corner.br{ bottom:-1px; right:-1px; border-left:none; border-top:none; border-radius:0 0 10px 0; }
+
+  .site-mark{
     font-family:'Playfair Display', serif;
     font-weight:700;
-    letter-spacing:.06em;
-    font-size:.95rem;
+    letter-spacing:.22em;
+    font-size:clamp(.8rem,1.6vw,1rem);
     text-transform:uppercase;
-    color:var(--crimson);
-    opacity:.7;
+    color:var(--gold2);
+    margin:0 0 .4em;
   }
-  #site .site-mark span{ color:var(--gold); }
-  .tribute-final{
+  .site-mark b{ color:var(--burgundy); font-weight:900; letter-spacing:.22em; }
+
+  .flourish{
     display:flex;
-    flex-direction:column;
     align-items:center;
-    gap:.9em;
-    max-width:38em;
-    margin:0 auto 1.8em;
+    justify-content:center;
+    gap:.7em;
+    margin:0 0 1.4em;
+    color:var(--gold2);
   }
+  .flourish::before, .flourish::after{
+    content:"";
+    height:1px; width:clamp(30px,8vw,70px);
+    background:linear-gradient(90deg, transparent, var(--gold2), transparent);
+  }
+  .flourish span{ font-size:1.1rem; }
+
   .tribute-line1{
-    font-size:clamp(1.25rem,3.2vw,1.85rem);
+    font-size:clamp(1.5rem,4.2vw,2.35rem);
     font-style:italic;
-    line-height:1.55;
-    color:#5a2323;
-    margin:0;
+    font-weight:500;
+    line-height:1.5;
+    color:var(--burgundy-deep);
+    margin:0 0 .75em;
   }
   .tribute-line2{
     font-family:'Playfair Display', serif;
-    font-weight:700;
-    font-size:clamp(1.7rem,5vw,2.6rem);
-    color:var(--crimson);
-    margin:0;
+    font-weight:900;
+    font-size:clamp(2.6rem,8vw,5.2rem);
+    line-height:1.06;
+    color:var(--burgundy);
+    text-shadow:0 2px 0 rgba(255,255,255,.5);
+    margin:0 0 .3em;
   }
   .tribute-line3{
     font-family:'Playfair Display', serif;
     font-weight:900;
     font-style:italic;
-    font-size:clamp(1.5rem,4.4vw,2.2rem);
-    background:linear-gradient(180deg, #c79a2c 0%, var(--gold) 55%, #9c7523 100%);
+    font-size:clamp(2.1rem,6.6vw,3.9rem);
+    margin:0 0 .9em;
+    background:linear-gradient(100deg, #a9781f 15%, var(--gold2-bright) 40%, #fffbe8 50%, var(--gold2-bright) 60%, #a9781f 85%);
+    background-size:250% 100%;
     -webkit-background-clip:text;
     background-clip:text;
     color:transparent;
-    margin:0;
+    animation:shimmerText 5s ease-in-out infinite;
   }
-  .tribute-line3 .heart{ -webkit-text-fill-color:initial; }
+  @keyframes shimmerText{
+    0%{ background-position:220% 0; }
+    100%{ background-position:-40% 0; }
+  }
+
+  .site-signature{
+    font-size:clamp(1rem,2.2vw,1.2rem);
+    font-style:italic;
+    color:var(--burgundy-deep);
+    opacity:.8;
+    margin:0 0 1.6em;
+  }
+
   #site .site-cta{
     display:inline-block;
-    margin-top:.6em;
-    padding:.75em 2.1em;
+    padding:.85em 2.6em;
     border-radius:999px;
-    background:linear-gradient(135deg,var(--crimson),var(--crimson-light));
-    color:var(--gold-bright);
+    background:linear-gradient(135deg,var(--burgundy),var(--burgundy-deep));
+    color:var(--gold2-bright);
     text-decoration:none;
     font-family:'Playfair Display', serif;
     font-weight:700;
-    font-size:.95rem;
-    letter-spacing:.04em;
-    box-shadow:0 10px 30px -8px rgba(110,13,13,.55);
+    font-size:clamp(1rem,2.4vw,1.2rem);
+    letter-spacing:.05em;
+    box-shadow:0 14px 34px -10px rgba(74,13,24,.6);
     transition:transform .25s ease, box-shadow .25s ease;
   }
   #site .site-cta:hover, #site .site-cta:focus-visible{
     transform:translateY(-2px);
-    box-shadow:0 14px 34px -8px rgba(110,13,13,.65);
+    box-shadow:0 18px 38px -10px rgba(74,13,24,.7);
   }
 
-  /* ============ Ceremony overlay ============ */
+  /* Entrance choreography — only plays once the ceremony reveals this page */
+  .site-mark, .flourish, .tribute-line1, .tribute-line2, .tribute-line3,
+  .site-signature, #site .site-cta{
+    opacity:0;
+    transform:translateY(16px);
+  }
+  #site.revealed .site-mark{ animation:siteFadeUp .8s var(--ease-ceremony) forwards .05s; }
+  #site.revealed .flourish{ animation:siteFadeUp .8s var(--ease-ceremony) forwards .18s; }
+  #site.revealed .tribute-line1{ animation:siteFadeUp .8s var(--ease-ceremony) forwards .32s; }
+  #site.revealed .tribute-line2{ animation:siteFadeUp .8s var(--ease-ceremony) forwards .5s; }
+  #site.revealed .tribute-line3{ animation:siteFadeUp .8s var(--ease-ceremony) forwards .68s; }
+  #site.revealed .site-signature{ animation:siteFadeUp .8s var(--ease-ceremony) forwards .82s; }
+  #site.revealed #site .site-cta,
+  #site.revealed .site-cta{ animation:siteFadeUp .8s var(--ease-ceremony) forwards .96s; }
+  @keyframes siteFadeUp{ to{ opacity:1; transform:translateY(0); } }
+
+  @media (prefers-reduced-motion: reduce){
+    .site-mark, .flourish, .tribute-line1, .tribute-line2, .tribute-line3,
+    .site-signature, #site .site-cta{ animation-duration:.01ms !important; }
+    .tribute-line3{ animation:none !important; background-position:0 0; }
+  }
+
+  /* ============================================================
+     PAGE ONE — the grand opening ceremony (intentionally wordless)
+     ============================================================ */
   #ceremony{
     position:fixed;
     inset:0;
@@ -134,7 +245,6 @@
   }
   #ceremony[hidden]{ display:none; }
 
-  /* Curtains */
   .curtain{
     position:absolute;
     top:0;
@@ -169,16 +279,49 @@
   #ceremony.opening .curtain-left{ transform:translateX(-102%); }
   #ceremony.opening .curtain-right{ transform:translateX(102%); }
 
+  .spotlight-sweep{
+    position:absolute;
+    left:50%; top:50%;
+    width:900px; height:900px;
+    margin:-450px 0 0 -450px;
+    background:conic-gradient(from 0deg, rgba(255,230,170,.09), transparent 25%, transparent 75%, rgba(255,230,170,.09));
+    animation:sweepRotate 26s linear infinite;
+    z-index:1;
+    pointer-events:none;
+    mix-blend-mode:screen;
+  }
+  @keyframes sweepRotate{ to{ transform:rotate(360deg); } }
+
+  #ceremony-sparkles{
+    position:absolute; inset:0;
+    z-index:2;
+    pointer-events:none;
+    overflow:hidden;
+  }
+  .sparkle{
+    position:absolute;
+    border-radius:50%;
+    background:radial-gradient(circle, #fff6da, var(--gold) 65%, transparent 100%);
+    opacity:0;
+    animation-name:sparkleDrift;
+    animation-timing-function:ease-in-out;
+    animation-fill-mode:forwards;
+  }
+  @keyframes sparkleDrift{
+    0%{ opacity:0; transform:translateY(0) scale(.5); }
+    50%{ opacity:.8; }
+    100%{ opacity:0; transform:translateY(-60px) scale(1); }
+  }
+
   .ceremony-vignette{
     position:absolute; inset:0;
     pointer-events:none;
     background:
-      radial-gradient(ellipse 60% 45% at 50% 40%, rgba(255,230,170,.16), transparent 60%),
+      radial-gradient(ellipse 60% 45% at 50% 40%, rgba(255,230,170,.14), transparent 60%),
       radial-gradient(ellipse 120% 90% at 50% 50%, transparent 50%, rgba(0,0,0,.45) 100%);
     z-index:2;
   }
 
-  /* Ceremony content: deliberately wordless — visuals + interaction only */
   .ceremony-content{
     position:relative;
     z-index:3;
@@ -216,32 +359,12 @@
   .ceremony-stage[hidden]{ display:none; }
   @keyframes stageFadeIn{ to{ opacity:1; } }
 
-  /* ---- Ribbon + real floating scissors (single synced SVG) ---- */
   .ribbon-rig{
-    width:min(520px,88vw);
+    width:min(560px,90vw);
     height:auto;
     filter:drop-shadow(0 14px 26px rgba(0,0,0,.5));
     overflow:visible;
   }
-  .glow-pulse{
-    animation:pulseGlow 2.4s ease-in-out infinite;
-    transform-origin:230px 58px;
-  }
-  @keyframes pulseGlow{
-    0%,100%{ opacity:.35; transform:scale(1); }
-    50%{ opacity:.75; transform:scale(1.18); }
-  }
-
-  .ribbon-left, .ribbon-right, .ribbon-knot{
-    transition:transform .6s ease, opacity .5s ease .08s;
-  }
-  .ribbon-left{ transform-origin:226px 60px; }
-  .ribbon-right{ transform-origin:234px 60px; }
-  .ribbon-knot{ transform-origin:230px 61px; }
-  #ceremony.cutting .ribbon-left{ transform:translate(-32px,30px) rotate(-16deg); opacity:0; }
-  #ceremony.cutting .ribbon-right{ transform:translate(32px,30px) rotate(16deg); opacity:0; }
-  #ceremony.cutting .ribbon-knot{ transform:scale(.3); opacity:0; }
-
   .scissor-hit{
     cursor:pointer;
     display:block;
@@ -249,47 +372,77 @@
     border:none;
     padding:0;
     margin:0;
+    border-radius:18px;
+    outline:none;
     -webkit-tap-highlight-color:transparent;
   }
-  .scissor-hit:focus-visible ~ .glow-pulse,
   .scissor-hit:focus-visible{
-    outline:none;
-  }
-  .scissor-hit:focus-visible + .scissor-rig .glow-pulse{
-    opacity:1;
+    outline:2.5px solid var(--gold-bright);
+    outline-offset:10px;
   }
 
-  .scissor-float{
-    animation:floatHover 2.6s ease-in-out infinite;
-    transform-origin:0 0;
+  .glow-pulse{
+    animation:pulseGlow 2.4s ease-in-out infinite;
+    transform-origin:230px 62px;
   }
-  .scissor-rig.settled .scissor-float{
-    animation:none;
-  }
-  @keyframes floatHover{
-    0%,100%{ transform:translateY(0) rotate(-2deg); }
-    50%{ transform:translateY(-9px) rotate(2deg); }
+  @keyframes pulseGlow{
+    0%,100%{ opacity:.3; transform:scale(1); }
+    50%{ opacity:.7; transform:scale(1.2); }
   }
 
-  .scissor-descend{
-    transform:translateY(0);
-    transform-origin:0 0;
-    transition:transform .85s var(--cut-ease);
+  .contact-shadow{
+    opacity:.12;
+    transform:scale(.5);
+    transform-origin:230px 74px;
+    transition:opacity .9s var(--cut-ease), transform .9s var(--cut-ease);
   }
-  .scissor-rig.active .scissor-descend{
-    transform:translateY(103px);
+  .contact-shadow.active{ opacity:.55; transform:scale(1.1); }
+
+  .ribbon-left, .ribbon-right, .ribbon-knot, .ribbon-hl-left, .ribbon-hl-right{
+    transition:transform .6s ease, opacity .5s ease .08s;
+  }
+  .ribbon-left, .ribbon-hl-left{ transform-origin:226px 60px; }
+  .ribbon-right, .ribbon-hl-right{ transform-origin:234px 60px; }
+  .ribbon-knot{ transform-origin:230px 62px; }
+  #ceremony.cutting .ribbon-left, #ceremony.cutting .ribbon-hl-left{ transform:translate(-34px,32px) rotate(-18deg); opacity:0; }
+  #ceremony.cutting .ribbon-right, #ceremony.cutting .ribbon-hl-right{ transform:translate(34px,32px) rotate(18deg); opacity:0; }
+  #ceremony.cutting .ribbon-knot{ transform:scale(.3); opacity:0; }
+
+  .flourish-swirl{
+    opacity:.55;
+    transition:opacity .5s ease;
+  }
+  #ceremony.cutting .flourish-swirl{ opacity:0; }
+
+  /* The scissors: roam freely while idle, then swoop to the ribbon and
+     cut automatically the instant they arrive (synced via transitionend). */
+  .scissor-move{
+    transform-origin:0 0;
+    transition:transform .95s var(--cut-ease);
+  }
+  .scissor-move.idle{
+    animation:driftFloat 9s ease-in-out infinite;
+  }
+  @keyframes driftFloat{
+    0%   { transform:translate(0px,0px)     rotate(-4deg); }
+    14%  { transform:translate(-46px,-24px) rotate(8deg); }
+    30%  { transform:translate(34px,-40px)  rotate(-7deg); }
+    46%  { transform:translate(54px,6px)    rotate(6deg); }
+    62%  { transform:translate(16px,34px)   rotate(-8deg); }
+    78%  { transform:translate(-42px,20px)  rotate(7deg); }
+    92%  { transform:translate(-16px,-10px) rotate(-3deg); }
+    100% { transform:translate(0px,0px)     rotate(-4deg); }
   }
 
   .blade{
     transform-origin:0 0;
-    transition:transform .85s var(--cut-ease);
+    transition:transform .95s var(--cut-ease);
   }
   .blade-left{ transform:rotate(-20deg); }
   .blade-right{ transform:rotate(20deg); }
   #ceremony .scissor-rig.active .blade-left{ transform:rotate(-3deg); }
   #ceremony .scissor-rig.active .blade-right{ transform:rotate(3deg); }
 
-  /* Confetti */
   #confetti-container{
     position:absolute;
     inset:0;
@@ -312,35 +465,48 @@
     100%{ opacity:0; transform:translateY(105vh) rotate(600deg); }
   }
 
-  /* Reduced motion */
   @media (prefers-reduced-motion: reduce){
     .curtain, .ceremony-content, .ribbon-left, .ribbon-right, .ribbon-knot,
-    .scissor-descend, .blade, .ceremony-stage, .scissor-float{
+    .ribbon-hl-left, .ribbon-hl-right, .scissor-move, .blade, .ceremony-stage,
+    .spotlight-sweep, .contact-shadow{
       transition-duration:.01ms !important;
       animation-duration:.01ms !important;
       animation-iteration-count:1 !important;
     }
+    .scissor-move.idle{ animation:none; }
   }
 </style>
 </head>
 <body>
 
-  <!-- ============ The AbiLearn site, revealed once the ribbon is cut ============ -->
+  <!-- ============ PAGE TWO: the AbiLearn tribute, revealed once the ribbon is cut ============ -->
   <main id="site" aria-hidden="true">
-    <p class="site-mark">Abi<span>Learn</span></p>
-    <div class="tribute-final">
+    <div id="site-sparkles" aria-hidden="true"></div>
+    <div class="tribute-card">
+      <span class="plaque-corner tl" aria-hidden="true"></span>
+      <span class="plaque-corner tr" aria-hidden="true"></span>
+      <span class="plaque-corner bl" aria-hidden="true"></span>
+      <span class="plaque-corner br" aria-hidden="true"></span>
+
+      <p class="site-mark">Abi<b>Learn</b></p>
+      <div class="flourish" aria-hidden="true"><span>❈</span></div>
+
       <p class="tribute-line1">It is my greatest tribute to you mam in my last year of school.</p>
       <p class="tribute-line2">Happy Teacher's Day Mam</p>
       <p class="tribute-line3">Abi Mam Forever <span class="heart">❤️</span></p>
+      <p class="site-signature">— with endless gratitude, your student</p>
+
+      <a class="site-cta" id="siteEnterLink" href="https://www.abilearn.co.in" rel="noopener">Enter AbiLearn →</a>
     </div>
-    <a class="site-cta" id="siteEnterLink" href="#" rel="noopener">Enter AbiLearn →</a>
   </main>
 
-  <!-- ============ Grand opening ceremony overlay (intentionally wordless) ============ -->
+  <!-- ============ PAGE ONE: grand opening ceremony (intentionally wordless) ============ -->
   <div id="ceremony" role="dialog" aria-modal="true" aria-label="AbiLearn Teacher's Day grand opening ceremony">
     <div class="curtain curtain-left" aria-hidden="true"></div>
     <div class="curtain curtain-right" aria-hidden="true"></div>
+    <div class="spotlight-sweep" aria-hidden="true"></div>
     <div class="ceremony-vignette" aria-hidden="true"></div>
+    <div id="ceremony-sparkles" aria-hidden="true"></div>
 
     <div class="ceremony-content">
       <div class="loading-ring" id="loadingRing" role="status" aria-label="Preparing the ceremony"></div>
@@ -379,32 +545,43 @@
               </radialGradient>
             </defs>
 
-            <!-- Ceremonial ribbon, gently sagging like a real strung ribbon -->
+            <!-- soft shadow the ribbon casts on the curtain behind it -->
+            <path d="M40,80 Q230,98 420,80" stroke="rgba(0,0,0,.35)" stroke-width="10"
+                  fill="none" stroke-linecap="round" opacity=".35" style="filter:blur(5px)"/>
+
+            <!-- ceremonial ribbon, gently sagging like a real strung ribbon -->
             <path class="ribbon-left" d="M0,50 C110,18 168,18 226,50 L226,74 C168,42 110,42 0,74 Z" fill="url(#ribbonGrad)"/>
             <path class="ribbon-right" d="M460,50 C350,18 292,18 234,50 L234,74 C292,42 350,42 460,74 Z" fill="url(#ribbonGrad)"/>
+            <path class="ribbon-hl-left" d="M8,54 C112,26 168,26 222,54" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2.5" stroke-linecap="round"/>
+            <path class="ribbon-hl-right" d="M452,54 C348,26 292,26 238,54" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2.5" stroke-linecap="round"/>
             <circle class="ribbon-knot" cx="230" cy="62" r="17" fill="url(#knotGrad)" stroke="#7a5a17" stroke-width="1"/>
 
-            <!-- Glow affordance showing the scissors are interactive -->
-            <circle class="glow-pulse" cx="230" cy="58" r="46" fill="url(#glowGrad)"/>
+            <!-- delicate hand-drawn flourishes flanking the knot, for a bespoke ceremonial feel -->
+            <path class="flourish-swirl" d="M188,62 C170,50 170,74 155,66" fill="none" stroke="#f3d576" stroke-width="1.6" stroke-linecap="round"/>
+            <path class="flourish-swirl" d="M272,62 C290,50 290,74 305,66" fill="none" stroke="#f3d576" stroke-width="1.6" stroke-linecap="round"/>
 
-            <!-- Real floating ceremonial scissors, hovering above the ribbon -->
+            <!-- affordance glow + the shadow the scissors cast as they approach the ribbon -->
+            <circle class="glow-pulse" cx="230" cy="62" r="46" fill="url(#glowGrad)"/>
+            <ellipse class="contact-shadow" id="contactShadow" cx="230" cy="76" rx="26" ry="7" fill="#1a0402" opacity=".12"/>
+
+            <!-- real, freely-floating ceremonial scissors -->
             <g class="scissor-rig" id="scissorRig" transform="translate(230,58)">
-              <g class="scissor-float">
-                <g class="scissor-descend" id="scissorDescend">
-                  <path class="handle" fill="url(#handleGrad)" fill-rule="evenodd"
-                        d="M -32,10 a20,26 0 1,0 40,0 a20,26 0 1,0 -40,0 M -24,10 a12,16 0 1,0 24,0 a12,16 0 1,0 -24,0"/>
-                  <path class="handle" fill="url(#handleGrad)" fill-rule="evenodd"
-                        d="M 12,10 a20,26 0 1,0 40,0 a20,26 0 1,0 -40,0 M 20,10 a12,16 0 1,0 24,0 a12,16 0 1,0 -24,0"/>
-                  <g class="blade blade-left">
-                    <path fill="url(#bladeGrad)" stroke="#6b7480" stroke-width=".6"
-                          d="M0,0 L-9,-6 C-13,-26 -10,-54 -3,-76 L3,-76 C7,-52 8,-26 6,-6 Z"/>
-                  </g>
-                  <g class="blade blade-right">
-                    <path fill="url(#bladeGrad)" stroke="#6b7480" stroke-width=".6"
-                          d="M0,0 L-6,-6 C-8,-26 -7,-52 -3,-76 L3,-76 C9,-54 12,-26 9,-6 Z"/>
-                  </g>
-                  <circle class="pivot" cx="0" cy="0" r="6.5" fill="url(#pivotGrad)" stroke="#7a5a17" stroke-width="1"/>
+              <g class="scissor-move idle" id="scissorMove">
+                <path class="handle" fill="url(#handleGrad)" fill-rule="evenodd"
+                      d="M -32,10 a20,26 0 1,0 40,0 a20,26 0 1,0 -40,0 M -24,10 a12,16 0 1,0 24,0 a12,16 0 1,0 -24,0"/>
+                <path class="handle" fill="url(#handleGrad)" fill-rule="evenodd"
+                      d="M 12,10 a20,26 0 1,0 40,0 a20,26 0 1,0 -40,0 M 20,10 a12,16 0 1,0 24,0 a12,16 0 1,0 -24,0"/>
+                <g class="blade blade-left">
+                  <path fill="url(#bladeGrad)" stroke="#6b7480" stroke-width=".6"
+                        d="M0,0 L-9,-6 C-13,-26 -10,-54 -3,-76 L3,-76 C7,-52 8,-26 6,-6 Z"/>
+                  <path d="M0,-6 L-1.5,-64" stroke="rgba(255,255,255,.6)" stroke-width="1" stroke-linecap="round"/>
                 </g>
+                <g class="blade blade-right">
+                  <path fill="url(#bladeGrad)" stroke="#6b7480" stroke-width=".6"
+                        d="M0,0 L-6,-6 C-8,-26 -7,-52 -3,-76 L3,-76 C9,-54 12,-26 9,-6 Z"/>
+                  <path d="M0,-6 L1.5,-64" stroke="rgba(255,255,255,.6)" stroke-width="1" stroke-linecap="round"/>
+                </g>
+                <circle class="pivot" cx="0" cy="0" r="6.5" fill="url(#pivotGrad)" stroke="#7a5a17" stroke-width="1"/>
               </g>
             </g>
           </svg>
@@ -422,11 +599,10 @@
   "use strict";
 
   // ---------------------------------------------------------------------
-  // Replace this with your real AbiLearn website URL. Leave it as "" to
-  // simply reveal the built-in AbiLearn tribute page instead of
-  // redirecting away.
+  // Where "Enter AbiLearn" takes visitors. Change this to redirect
+  // elsewhere — the link on the tribute page always points here.
   // ---------------------------------------------------------------------
-  const ABILEARN_URL = "";
+  const ABILEARN_URL = "https://www.abilearn.co.in";
 
   const htmlEl = document.documentElement;
   const ceremony = document.getElementById('ceremony');
@@ -434,23 +610,41 @@
   const ceremonyStage = document.getElementById('ceremonyStage');
   const openBtn = document.getElementById('openBtn');
   const scissorRig = document.getElementById('scissorRig');
-  const scissorDescend = document.getElementById('scissorDescend');
+  const scissorMove = document.getElementById('scissorMove');
+  const contactShadow = document.getElementById('contactShadow');
   const announcer = document.getElementById('ceremonyAnnouncer');
   const confettiContainer = document.getElementById('confetti-container');
+  const ceremonySparkles = document.getElementById('ceremony-sparkles');
   const site = document.getElementById('site');
   const siteEnterLink = document.getElementById('siteEnterLink');
+  const siteSparkles = document.getElementById('site-sparkles');
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  if (siteEnterLink) {
-    siteEnterLink.href = ABILEARN_URL || '#';
-    if (!ABILEARN_URL) siteEnterLink.addEventListener('click', e => e.preventDefault());
-  }
+  if (siteEnterLink) siteEnterLink.href = ABILEARN_URL;
 
-  // Lock page scroll while the ceremony is active.
   htmlEl.classList.add('ceremony-lock');
 
   let opened = false;
+  let sparkleTimer = null;
+  let emberTimer = null;
+
+  // ---- Ambient golden sparkles drifting across the ceremony (idle atmosphere) ----
+  function spawnSparkle() {
+    const s = document.createElement('span');
+    s.className = 'sparkle';
+    const size = 3 + Math.random() * 5;
+    s.style.width = size + 'px';
+    s.style.height = size + 'px';
+    s.style.left = (5 + Math.random() * 90) + 'vw';
+    s.style.top = (10 + Math.random() * 75) + 'vh';
+    s.style.animationDuration = (2.4 + Math.random() * 2.2) + 's';
+    ceremonySparkles.appendChild(s);
+    s.addEventListener('animationend', () => s.remove());
+  }
+  if (!reduceMotion) {
+    sparkleTimer = window.setInterval(spawnSparkle, 380);
+  }
 
   // ---- Intentional "loading" beat before the ribbon & scissors appear ----
   window.setTimeout(() => {
@@ -459,7 +653,6 @@
     openBtn.focus();
   }, reduceMotion ? 50 : 1200);
 
-  // ---- Golden confetti burst ----
   function launchConfetti() {
     const colors = ['#d4af37', '#f3d576', '#ffedb0', '#ffffff'];
     const count = reduceMotion ? 0 : 90;
@@ -478,19 +671,33 @@
     }
   }
 
-  // ---- The scissors physically descend; the ribbon cuts the instant they arrive ----
+  // Reads the scissors' current on-screen position (however far they've
+  // roamed) so the swoop-to-cut can start from wherever they actually are.
+  function readCurrentTransform(el) {
+    const cssTransform = getComputedStyle(el).transform;
+    if (!cssTransform || cssTransform === 'none') return { x: 0, y: 0, deg: 0 };
+    const m = new DOMMatrixReadOnly(cssTransform);
+    const deg = Math.atan2(m.b, m.a) * (180 / Math.PI);
+    return { x: m.e, y: m.f, deg };
+  }
+
   function openCeremony() {
     if (opened) return;
     opened = true;
 
     openBtn.disabled = true;
-    announcer.textContent = 'The scissors are descending toward the ribbon…';
+    announcer.textContent = 'The scissors are swooping in to cut the ribbon…';
 
-    // Stop the idle hover so the descent is a single clean motion.
-    scissorRig.classList.add('settled');
-    // Force reflow so removing the float animation takes effect before we start the descent.
-    void scissorRig.offsetWidth;
+    // Freeze the scissors exactly where their free-floating drift left them,
+    // then let them swoop from that real position toward the ribbon.
+    const cur = readCurrentTransform(scissorMove);
+    scissorMove.classList.remove('idle');
+    scissorMove.style.transform = `translate(${cur.x}px, ${cur.y}px) rotate(${cur.deg}deg)`;
+    void scissorMove.offsetWidth;
+    scissorMove.style.transform = 'translate(0px,104px) rotate(0deg)';
+
     scissorRig.classList.add('active');
+    contactShadow.classList.add('active');
 
     let cutFired = false;
     const triggerCut = () => {
@@ -508,37 +715,48 @@
     };
 
     // The cut fires automatically the instant the scissors' blades reach the ribbon.
-    scissorDescend.addEventListener('transitionend', function handler(e) {
+    scissorMove.addEventListener('transitionend', function handler(e) {
       if (e.propertyName !== 'transform') return;
-      scissorDescend.removeEventListener('transitionend', handler);
+      scissorMove.removeEventListener('transitionend', handler);
       triggerCut();
     });
-    // Safety net in case the transitionend event doesn't fire in some browser context.
-    window.setTimeout(triggerCut, reduceMotion ? 60 : 950);
+    window.setTimeout(triggerCut, reduceMotion ? 60 : 1050);
+  }
+
+  // ---- Ambient embers drifting up through the revealed tribute page ----
+  function spawnEmber() {
+    const e = document.createElement('span');
+    e.className = 'site-ember';
+    const size = 4 + Math.random() * 6;
+    e.style.width = size + 'px';
+    e.style.height = size + 'px';
+    e.style.left = (4 + Math.random() * 92) + 'vw';
+    e.style.animationDuration = (5 + Math.random() * 3) + 's';
+    siteSparkles.appendChild(e);
+    e.addEventListener('animationend', () => e.remove());
   }
 
   function finishCeremony() {
+    if (sparkleTimer) { window.clearInterval(sparkleTimer); sparkleTimer = null; }
+
     ceremony.setAttribute('hidden', '');
     ceremony.setAttribute('aria-hidden', 'true');
     htmlEl.classList.remove('ceremony-lock');
 
     site.removeAttribute('aria-hidden');
+    site.classList.add('revealed');
     site.setAttribute('tabindex', '-1');
     site.focus();
 
     announcer.textContent = "AbiLearn is now open. Happy Teacher's Day, Abi Mam!";
 
-    if (ABILEARN_URL) {
-      window.setTimeout(() => {
-        window.location.href = ABILEARN_URL;
-      }, 700);
+    if (!reduceMotion) {
+      emberTimer = window.setInterval(spawnEmber, 550);
     }
   }
 
   openBtn.addEventListener('click', openCeremony);
 
-  // Extra keyboard support: Enter/Space activate the button natively;
-  // Enter anywhere on the page also triggers the ceremony while it's active.
   document.addEventListener('keydown', (e) => {
     if (opened) return;
     if (e.key === 'Enter' && !ceremony.hasAttribute('hidden') && document.activeElement !== openBtn) {
