@@ -263,6 +263,7 @@
     z-index:9999;
     overflow:hidden;
     background:var(--deep-red);
+    touch-action:none;
   }
   #ceremony[hidden]{ display:none; }
 
@@ -583,10 +584,11 @@
       </div>
     </div>
 
-    <!-- Real ceremonial scissors, free to roam the whole screen. Click/tap
-         them wherever they are — they swoop to the ribbon and cut on contact. -->
+    <!-- Real ceremonial scissors, fully under the visitor's control: they
+         follow the mouse/finger anywhere on screen. Click/tap to make them
+         swoop the rest of the way to the ribbon and cut. -->
     <button type="button" class="floating-scissors" id="openBtn"
-            aria-label="Cut the ribbon to open AbiLearn">
+            aria-label="Move to position the scissors, then click or press Enter to cut the ribbon and open AbiLearn">
       <svg viewBox="0 0 96 138" focusable="false">
         <defs>
           <linearGradient id="bladeGrad2" x1="0" y1="1" x2="0" y2="0">
@@ -705,26 +707,14 @@
     openBtn.style.transform = `translate(${px - PIVOT_X}px, ${py - PIVOT_Y}px) rotate(${deg}deg)`;
   }
 
-  // ---- The scissors roam the ENTIRE ceremony screen, one waypoint at a time ----
-  let roaming = false;
-  let roamTimer = null;
-  let lastPivot = { x: 0, y: 0 };
+  // ---- The scissors are fully user-controlled: they follow the pointer/
+  // finger directly (a short transition just smooths out jitter) rather
+  // than moving on their own. ----
+  const FOLLOW_MS = 90;
 
-  function scheduleNextRoam() {
-    if (!roaming) return;
-    const margin = 70;
-    const w = window.innerWidth, h = window.innerHeight;
-    const target = {
-      x: margin + Math.random() * (w - margin * 2),
-      y: h * 0.14 + Math.random() * (h * 0.62),
-    };
-    const dx = target.x - lastPivot.x, dy = target.y - lastPivot.y;
-    const travelDeg = Math.atan2(dy, dx) * (180 / Math.PI) + 90;
-    const dist = Math.hypot(dx, dy);
-    const duration = Math.min(3600, Math.max(1300, dist * 3.6));
-    setScissorsPivot(target.x, target.y, travelDeg, duration);
-    lastPivot = target;
-    roamTimer = window.setTimeout(scheduleNextRoam, duration + 350 + Math.random() * 650);
+  function handlePointerMove(e) {
+    if (opened || ceremonyStage.hidden) return;
+    setScissorsPivot(e.clientX, e.clientY, 0, FOLLOW_MS);
   }
 
   // ---- Intentional "loading" beat before the ribbon & scissors appear ----
@@ -732,18 +722,15 @@
     loadingRing.hidden = true;
     ceremonyStage.hidden = false;
 
-    // Start the scissors right above the ribbon (no jump), then let them roam.
+    // Start the scissors right above the ribbon (no jump); from here on
+    // they only go where the user's mouse/finger takes them.
     requestAnimationFrame(() => {
       const start = getRibbonContactPoint();
-      lastPivot = start;
       setScissorsPivot(start.x, start.y, 0, 0);
       void openBtn.offsetWidth;
       openBtn.classList.add('visible');
       openBtn.focus();
-      if (!reduceMotion) {
-        roaming = true;
-        roamTimer = window.setTimeout(scheduleNextRoam, 500);
-      }
+      ceremony.addEventListener('pointermove', handlePointerMove);
     });
   }, reduceMotion ? 50 : 1200);
 
@@ -766,18 +753,16 @@
   }
 
   function openCeremony() {
-    if (opened) return;
+    if (opened || ceremonyStage.hidden) return;
     opened = true;
 
-    roaming = false;
-    if (roamTimer) { window.clearTimeout(roamTimer); roamTimer = null; }
-
+    ceremony.removeEventListener('pointermove', handlePointerMove);
     openBtn.disabled = true;
     announcer.textContent = 'The scissors are swooping in to cut the ribbon…';
 
-    // Freeze the scissors exactly wherever their free roam left them (mid-
-    // flight or not), then swoop from that real position onto the ribbon's
-    // actual on-screen location — accurate no matter how the page is sized.
+    // Freeze the scissors exactly where the user's pointer left them, then
+    // swoop from that real position onto the ribbon's actual on-screen
+    // location — accurate no matter how the page is sized.
     const cur = readCurrentTransform(openBtn);
     const currentPivot = { x: cur.x + PIVOT_X, y: cur.y + PIVOT_Y };
     setScissorsPivot(currentPivot.x, currentPivot.y, cur.deg, 0);
@@ -849,7 +834,10 @@
     }
   }
 
-  openBtn.addEventListener('click', openCeremony);
+  // Clicking/tapping anywhere in the ceremony cuts — the scissors are
+  // already wherever the user's pointer put them. (A keyboard "click" on
+  // the focused button bubbles here too, so Enter/Space still work.)
+  ceremony.addEventListener('click', openCeremony);
 
   document.addEventListener('keydown', (e) => {
     if (opened) return;
