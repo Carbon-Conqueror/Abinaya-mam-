@@ -585,10 +585,10 @@
     </div>
 
     <!-- Real ceremonial scissors, fully under the visitor's control: they
-         follow the mouse/finger anywhere on screen. Click/tap to make them
-         swoop the rest of the way to the ribbon and cut. -->
+         follow the mouse/finger anywhere on screen. No click needed —
+         bringing them onto the ribbon cuts it automatically. -->
     <button type="button" class="floating-scissors" id="openBtn"
-            aria-label="Move to position the scissors, then click or press Enter to cut the ribbon and open AbiLearn">
+            aria-label="Move the scissors onto the ribbon to cut it and open AbiLearn, or press Enter">
       <svg viewBox="0 0 96 138" focusable="false">
         <defs>
           <linearGradient id="bladeGrad2" x1="0" y1="1" x2="0" y2="0">
@@ -709,12 +709,17 @@
 
   // ---- The scissors are fully user-controlled: they follow the pointer/
   // finger directly (a short transition just smooths out jitter) rather
-  // than moving on their own. ----
+  // than moving on their own — and there is no click to cut. Bringing
+  // them close enough to the ribbon's center cuts it automatically. ----
   const FOLLOW_MS = 90;
+  const CUT_DISTANCE = 46;
 
   function handlePointerMove(e) {
     if (opened || ceremonyStage.hidden) return;
     setScissorsPivot(e.clientX, e.clientY, 0, FOLLOW_MS);
+    const target = getRibbonContactPoint();
+    const dist = Math.hypot(e.clientX - target.x, e.clientY - target.y);
+    if (dist < CUT_DISTANCE) openCeremony();
   }
 
   // ---- Intentional "loading" beat before the ribbon & scissors appear ----
@@ -722,11 +727,11 @@
     loadingRing.hidden = true;
     ceremonyStage.hidden = false;
 
-    // Start the scissors right above the ribbon (no jump); from here on
-    // they only go where the user's mouse/finger takes them.
+    // Start the scissors clearly above the ribbon (not already touching
+    // it) so the ceremony waits for the user to actually bring them down.
     requestAnimationFrame(() => {
       const start = getRibbonContactPoint();
-      setScissorsPivot(start.x, start.y, 0, 0);
+      setScissorsPivot(start.x, start.y - 150, 0, 0);
       void openBtn.offsetWidth;
       openBtn.classList.add('visible');
       openBtn.focus();
@@ -834,11 +839,9 @@
     }
   }
 
-  // Clicking/tapping anywhere in the ceremony cuts — the scissors are
-  // already wherever the user's pointer put them. (A keyboard "click" on
-  // the focused button bubbles here too, so Enter/Space still work.)
-  ceremony.addEventListener('click', openCeremony);
-
+  // No click needed — bringing the scissors to the ribbon (via
+  // handlePointerMove) is what cuts it. Enter remains as a keyboard
+  // fallback for anyone who can't use a mouse/touch to position them.
   document.addEventListener('keydown', (e) => {
     if (opened) return;
     if (e.key === 'Enter' && !ceremony.hasAttribute('hidden') && document.activeElement !== openBtn) {
