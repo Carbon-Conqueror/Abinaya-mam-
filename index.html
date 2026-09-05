@@ -386,21 +386,37 @@
     filter:drop-shadow(0 14px 26px rgba(0,0,0,.5));
     overflow:visible;
   }
-  .scissor-hit{
-    cursor:pointer;
-    display:block;
-    background:none;
-    border:none;
+
+  /* The scissors: a standalone element free to roam the ENTIRE ceremony
+     screen (not just the area near the ribbon). transform-origin sits
+     exactly on the pivot so rotating in flight never shifts its
+     effective position — that keeps the swoop-to-cut math exact. */
+  .floating-scissors{
+    position:fixed;
+    left:0;
+    top:0;
+    width:96px;
+    height:138px;
     padding:0;
     margin:0;
-    border-radius:18px;
+    background:none;
+    border:none;
     outline:none;
+    cursor:pointer;
+    z-index:6;
+    transform-origin:48px 96px;
     -webkit-tap-highlight-color:transparent;
+    filter:drop-shadow(0 12px 20px rgba(0,0,0,.55));
+    opacity:0;
+    transition:transform .95s var(--cut-ease), opacity .5s ease;
   }
-  .scissor-hit:focus-visible{
+  .floating-scissors.visible{ opacity:1; }
+  .floating-scissors:focus-visible{
     outline:2.5px solid var(--gold-bright);
-    outline-offset:10px;
+    outline-offset:6px;
+    border-radius:16px;
   }
+  .floating-scissors svg{ width:100%; height:100%; display:block; overflow:visible; }
 
   .glow-pulse{
     animation:pulseGlow 2.4s ease-in-out infinite;
@@ -435,34 +451,16 @@
   }
   #ceremony.cutting .flourish-swirl{ opacity:0; }
 
-  /* The scissors: roam freely while idle, then swoop to the ribbon and
-     cut automatically the instant they arrive (synced via transitionend). */
-  .scissor-move{
-    transform-origin:0 0;
-    transition:transform .95s var(--cut-ease);
-  }
-  .scissor-move.idle{
-    animation:driftFloat 9s ease-in-out infinite;
-  }
-  @keyframes driftFloat{
-    0%   { transform:translate(0px,0px)     rotate(-4deg); }
-    14%  { transform:translate(-46px,-24px) rotate(8deg); }
-    30%  { transform:translate(34px,-40px)  rotate(-7deg); }
-    46%  { transform:translate(54px,6px)    rotate(6deg); }
-    62%  { transform:translate(16px,34px)   rotate(-8deg); }
-    78%  { transform:translate(-42px,20px)  rotate(7deg); }
-    92%  { transform:translate(-16px,-10px) rotate(-3deg); }
-    100% { transform:translate(0px,0px)     rotate(-4deg); }
-  }
-
+  /* Blades snap shut the instant the scissors arrive at the ribbon —
+     triggered purely by toggling .active on the floating-scissors button. */
   .blade{
     transform-origin:0 0;
-    transition:transform .95s var(--cut-ease);
+    transition:transform .4s var(--cut-ease);
   }
   .blade-left{ transform:rotate(-20deg); }
   .blade-right{ transform:rotate(20deg); }
-  #ceremony .scissor-rig.active .blade-left{ transform:rotate(-3deg); }
-  #ceremony .scissor-rig.active .blade-right{ transform:rotate(3deg); }
+  .floating-scissors.active .blade-left{ transform:rotate(-3deg); }
+  .floating-scissors.active .blade-right{ transform:rotate(3deg); }
 
   #confetti-container{
     position:absolute;
@@ -488,13 +486,12 @@
 
   @media (prefers-reduced-motion: reduce){
     .curtain, .ceremony-content, .ribbon-left, .ribbon-right, .ribbon-knot,
-    .ribbon-hl-left, .ribbon-hl-right, .scissor-move, .blade, .ceremony-stage,
+    .ribbon-hl-left, .ribbon-hl-right, .floating-scissors, .blade, .ceremony-stage,
     .spotlight-sweep, .contact-shadow{
       transition-duration:.01ms !important;
       animation-duration:.01ms !important;
       animation-iteration-count:1 !important;
     }
-    .scissor-move.idle{ animation:none; }
   }
 </style>
 </head>
@@ -533,9 +530,7 @@
       <div class="loading-ring" id="loadingRing" role="status" aria-label="Preparing the ceremony"></div>
 
       <div class="ceremony-stage" id="ceremonyStage" hidden>
-        <button type="button" class="scissor-hit" id="openBtn"
-                aria-label="Cut the ribbon to open AbiLearn">
-          <svg class="ribbon-rig" viewBox="0 0 460 210" preserveAspectRatio="xMidYMid meet" focusable="false">
+          <svg class="ribbon-rig" viewBox="0 0 460 210" preserveAspectRatio="xMidYMid meet" focusable="false" aria-hidden="true">
             <defs>
               <linearGradient id="ribbonGrad" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#ffedb0"/>
@@ -584,31 +579,49 @@
             <!-- affordance glow + the shadow the scissors cast as they approach the ribbon -->
             <circle class="glow-pulse" cx="230" cy="62" r="46" fill="url(#glowGrad)"/>
             <ellipse class="contact-shadow" id="contactShadow" cx="230" cy="76" rx="26" ry="7" fill="#1a0402" opacity=".12"/>
-
-            <!-- real, freely-floating ceremonial scissors -->
-            <g class="scissor-rig" id="scissorRig" transform="translate(230,58)">
-              <g class="scissor-move idle" id="scissorMove">
-                <path class="handle" fill="url(#handleGrad)" fill-rule="evenodd"
-                      d="M -32,10 a20,26 0 1,0 40,0 a20,26 0 1,0 -40,0 M -24,10 a12,16 0 1,0 24,0 a12,16 0 1,0 -24,0"/>
-                <path class="handle" fill="url(#handleGrad)" fill-rule="evenodd"
-                      d="M 12,10 a20,26 0 1,0 40,0 a20,26 0 1,0 -40,0 M 20,10 a12,16 0 1,0 24,0 a12,16 0 1,0 -24,0"/>
-                <g class="blade blade-left">
-                  <path fill="url(#bladeGrad)" stroke="#6b7480" stroke-width=".6"
-                        d="M0,0 L-9,-6 C-13,-26 -10,-54 -3,-76 L3,-76 C7,-52 8,-26 6,-6 Z"/>
-                  <path d="M0,-6 L-1.5,-64" stroke="rgba(255,255,255,.6)" stroke-width="1" stroke-linecap="round"/>
-                </g>
-                <g class="blade blade-right">
-                  <path fill="url(#bladeGrad)" stroke="#6b7480" stroke-width=".6"
-                        d="M0,0 L-6,-6 C-8,-26 -7,-52 -3,-76 L3,-76 C9,-54 12,-26 9,-6 Z"/>
-                  <path d="M0,-6 L1.5,-64" stroke="rgba(255,255,255,.6)" stroke-width="1" stroke-linecap="round"/>
-                </g>
-                <circle class="pivot" cx="0" cy="0" r="6.5" fill="url(#pivotGrad)" stroke="#7a5a17" stroke-width="1"/>
-              </g>
-            </g>
           </svg>
-        </button>
       </div>
     </div>
+
+    <!-- Real ceremonial scissors, free to roam the whole screen. Click/tap
+         them wherever they are — they swoop to the ribbon and cut on contact. -->
+    <button type="button" class="floating-scissors" id="openBtn"
+            aria-label="Cut the ribbon to open AbiLearn">
+      <svg viewBox="0 0 96 138" focusable="false">
+        <defs>
+          <linearGradient id="bladeGrad2" x1="0" y1="1" x2="0" y2="0">
+            <stop offset="0%" stop-color="#8f98a3"/>
+            <stop offset="55%" stop-color="#d8dee5"/>
+            <stop offset="100%" stop-color="#f6f8fa"/>
+          </linearGradient>
+          <radialGradient id="pivotGrad2" cx="35%" cy="35%" r="70%">
+            <stop offset="0%" stop-color="#fff6da"/>
+            <stop offset="100%" stop-color="#b6862a"/>
+          </radialGradient>
+          <linearGradient id="handleGrad2" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ffedb0"/>
+            <stop offset="100%" stop-color="#b6862a"/>
+          </linearGradient>
+        </defs>
+        <g transform="translate(48,96)">
+          <path class="handle" fill="url(#handleGrad2)" fill-rule="evenodd"
+                d="M -32,10 a20,26 0 1,0 40,0 a20,26 0 1,0 -40,0 M -24,10 a12,16 0 1,0 24,0 a12,16 0 1,0 -24,0"/>
+          <path class="handle" fill="url(#handleGrad2)" fill-rule="evenodd"
+                d="M 12,10 a20,26 0 1,0 40,0 a20,26 0 1,0 -40,0 M 20,10 a12,16 0 1,0 24,0 a12,16 0 1,0 -24,0"/>
+          <g class="blade blade-left">
+            <path fill="url(#bladeGrad2)" stroke="#6b7480" stroke-width=".6"
+                  d="M0,0 L-9,-6 C-13,-26 -10,-54 -3,-76 L3,-76 C7,-52 8,-26 6,-6 Z"/>
+            <path d="M0,-6 L-1.5,-64" stroke="rgba(255,255,255,.6)" stroke-width="1" stroke-linecap="round"/>
+          </g>
+          <g class="blade blade-right">
+            <path fill="url(#bladeGrad2)" stroke="#6b7480" stroke-width=".6"
+                  d="M0,0 L-6,-6 C-8,-26 -7,-52 -3,-76 L3,-76 C9,-54 12,-26 9,-6 Z"/>
+            <path d="M0,-6 L1.5,-64" stroke="rgba(255,255,255,.6)" stroke-width="1" stroke-linecap="round"/>
+          </g>
+          <circle class="pivot" cx="0" cy="0" r="6.5" fill="url(#pivotGrad2)" stroke="#7a5a17" stroke-width="1"/>
+        </g>
+      </svg>
+    </button>
 
     <div id="confetti-container" aria-hidden="true"></div>
   </div>
@@ -630,8 +643,7 @@
   const loadingRing = document.getElementById('loadingRing');
   const ceremonyStage = document.getElementById('ceremonyStage');
   const openBtn = document.getElementById('openBtn');
-  const scissorRig = document.getElementById('scissorRig');
-  const scissorMove = document.getElementById('scissorMove');
+  const ribbonRig = document.querySelector('.ribbon-rig');
   const contactShadow = document.getElementById('contactShadow');
   const announcer = document.getElementById('ceremonyAnnouncer');
   const confettiContainer = document.getElementById('confetti-container');
@@ -639,6 +651,9 @@
   const site = document.getElementById('site');
   const siteEnterLink = document.getElementById('siteEnterLink');
   const siteSparkles = document.getElementById('site-sparkles');
+
+  // Pivot offset within the scissors' own SVG (must match its viewBox/markup).
+  const PIVOT_X = 48, PIVOT_Y = 96;
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -667,11 +682,69 @@
     sparkleTimer = window.setInterval(spawnSparkle, 380);
   }
 
+  // Reads an element's current on-screen transform (translate + rotation),
+  // however far a transition has carried it — used both to freeze the
+  // scissors mid-flight and to know exactly where their pivot sits now.
+  function readCurrentTransform(el) {
+    const cssTransform = getComputedStyle(el).transform;
+    if (!cssTransform || cssTransform === 'none') return { x: 0, y: 0, deg: 0 };
+    const m = new DOMMatrixReadOnly(cssTransform);
+    const deg = Math.atan2(m.b, m.a) * (180 / Math.PI);
+    return { x: m.e, y: m.f, deg };
+  }
+
+  // The ribbon's actual on-screen cut point, however the SVG is currently
+  // scaled by the viewport — computed live so the swoop always lands exactly.
+  function getRibbonContactPoint() {
+    const r = ribbonRig.getBoundingClientRect();
+    return { x: r.left + r.width * (230 / 460), y: r.top + r.height * (62 / 210) };
+  }
+
+  function setScissorsPivot(px, py, deg, durationMs) {
+    openBtn.style.transitionDuration = durationMs + 'ms';
+    openBtn.style.transform = `translate(${px - PIVOT_X}px, ${py - PIVOT_Y}px) rotate(${deg}deg)`;
+  }
+
+  // ---- The scissors roam the ENTIRE ceremony screen, one waypoint at a time ----
+  let roaming = false;
+  let roamTimer = null;
+  let lastPivot = { x: 0, y: 0 };
+
+  function scheduleNextRoam() {
+    if (!roaming) return;
+    const margin = 70;
+    const w = window.innerWidth, h = window.innerHeight;
+    const target = {
+      x: margin + Math.random() * (w - margin * 2),
+      y: h * 0.14 + Math.random() * (h * 0.62),
+    };
+    const dx = target.x - lastPivot.x, dy = target.y - lastPivot.y;
+    const travelDeg = Math.atan2(dy, dx) * (180 / Math.PI) + 90;
+    const dist = Math.hypot(dx, dy);
+    const duration = Math.min(3600, Math.max(1300, dist * 3.6));
+    setScissorsPivot(target.x, target.y, travelDeg, duration);
+    lastPivot = target;
+    roamTimer = window.setTimeout(scheduleNextRoam, duration + 350 + Math.random() * 650);
+  }
+
   // ---- Intentional "loading" beat before the ribbon & scissors appear ----
   window.setTimeout(() => {
     loadingRing.hidden = true;
     ceremonyStage.hidden = false;
-    openBtn.focus();
+
+    // Start the scissors right above the ribbon (no jump), then let them roam.
+    requestAnimationFrame(() => {
+      const start = getRibbonContactPoint();
+      lastPivot = start;
+      setScissorsPivot(start.x, start.y, 0, 0);
+      void openBtn.offsetWidth;
+      openBtn.classList.add('visible');
+      openBtn.focus();
+      if (!reduceMotion) {
+        roaming = true;
+        roamTimer = window.setTimeout(scheduleNextRoam, 500);
+      }
+    });
   }, reduceMotion ? 50 : 1200);
 
   function launchConfetti() {
@@ -692,33 +765,33 @@
     }
   }
 
-  // Reads the scissors' current on-screen position (however far they've
-  // roamed) so the swoop-to-cut can start from wherever they actually are.
-  function readCurrentTransform(el) {
-    const cssTransform = getComputedStyle(el).transform;
-    if (!cssTransform || cssTransform === 'none') return { x: 0, y: 0, deg: 0 };
-    const m = new DOMMatrixReadOnly(cssTransform);
-    const deg = Math.atan2(m.b, m.a) * (180 / Math.PI);
-    return { x: m.e, y: m.f, deg };
-  }
-
   function openCeremony() {
     if (opened) return;
     opened = true;
 
+    roaming = false;
+    if (roamTimer) { window.clearTimeout(roamTimer); roamTimer = null; }
+
     openBtn.disabled = true;
     announcer.textContent = 'The scissors are swooping in to cut the ribbon…';
 
-    // Freeze the scissors exactly where their free-floating drift left them,
-    // then let them swoop from that real position toward the ribbon.
-    const cur = readCurrentTransform(scissorMove);
-    scissorMove.classList.remove('idle');
-    scissorMove.style.transform = `translate(${cur.x}px, ${cur.y}px) rotate(${cur.deg}deg)`;
-    void scissorMove.offsetWidth;
-    scissorMove.style.transform = 'translate(0px,104px) rotate(0deg)';
+    // Freeze the scissors exactly wherever their free roam left them (mid-
+    // flight or not), then swoop from that real position onto the ribbon's
+    // actual on-screen location — accurate no matter how the page is sized.
+    const cur = readCurrentTransform(openBtn);
+    const currentPivot = { x: cur.x + PIVOT_X, y: cur.y + PIVOT_Y };
+    setScissorsPivot(currentPivot.x, currentPivot.y, cur.deg, 0);
+    void openBtn.offsetWidth;
 
-    scissorRig.classList.add('active');
+    const target = getRibbonContactPoint();
+    const swoopDuration = reduceMotion ? 30 : 900;
+    setScissorsPivot(target.x, target.y, 0, swoopDuration);
+
     contactShadow.classList.add('active');
+    // Blades snap shut in the final stretch of the flight so the close
+    // reads as caused by reaching the ribbon, not a fixed timer.
+    window.setTimeout(() => openBtn.classList.add('active'),
+      reduceMotion ? 0 : Math.max(0, swoopDuration - 380));
 
     let cutFired = false;
     const triggerCut = () => {
@@ -735,13 +808,13 @@
       window.setTimeout(finishCeremony, reduceMotion ? 50 : 480 + 1650);
     };
 
-    // The cut fires automatically the instant the scissors' blades reach the ribbon.
-    scissorMove.addEventListener('transitionend', function handler(e) {
+    // The cut fires automatically the instant the scissors reach the ribbon.
+    openBtn.addEventListener('transitionend', function handler(e) {
       if (e.propertyName !== 'transform') return;
-      scissorMove.removeEventListener('transitionend', handler);
+      openBtn.removeEventListener('transitionend', handler);
       triggerCut();
     });
-    window.setTimeout(triggerCut, reduceMotion ? 60 : 1050);
+    window.setTimeout(triggerCut, swoopDuration + (reduceMotion ? 60 : 150));
   }
 
   // ---- Ambient embers drifting up through the revealed tribute page ----
