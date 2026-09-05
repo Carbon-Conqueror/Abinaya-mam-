@@ -230,26 +230,29 @@
     box-shadow:0 18px 38px -10px rgba(74,13,24,.7);
   }
 
-  /* Entrance choreography — only plays once the ceremony reveals this page */
-  .site-mark, .flourish, .tribute-line1, .tribute-line2, .tribute-line3,
-  .site-signature, #site .site-cta{
-    opacity:0;
-    transform:translateY(16px);
-  }
-  #site.revealed .site-mark{ animation:siteFadeUp .8s var(--ease-ceremony) forwards .05s; }
-  #site.revealed .flourish{ animation:siteFadeUp .8s var(--ease-ceremony) forwards .18s; }
-  #site.revealed .tribute-line1{ animation:siteFadeUp .8s var(--ease-ceremony) forwards .32s; }
-  #site.revealed .tribute-line2{ animation:siteFadeUp .8s var(--ease-ceremony) forwards .5s; }
-  #site.revealed .tribute-line3{ animation:siteFadeUp .8s var(--ease-ceremony) forwards .68s; }
-  #site.revealed .site-signature{ animation:siteFadeUp .8s var(--ease-ceremony) forwards .82s; }
+  /* Entrance choreography — a bonus effect only, never the sole reason
+     content becomes visible. These elements are fully visible by default;
+     the fade-up keyframes (self-contained, not a separate base rule) only
+     play once the ceremony adds .revealed. If that JS ever fails to run
+     for any reason, the tribute is still shown — just without the
+     animation — instead of staying permanently blank. */
+  #site.revealed .site-mark{ animation:siteFadeUp .8s var(--ease-ceremony) both .05s; }
+  #site.revealed .flourish{ animation:siteFadeUp .8s var(--ease-ceremony) both .18s; }
+  #site.revealed .tribute-line1{ animation:siteFadeUp .8s var(--ease-ceremony) both .32s; }
+  #site.revealed .tribute-line2{ animation:siteFadeUp .8s var(--ease-ceremony) both .5s; }
+  #site.revealed .tribute-line3{ animation:shimmerText 5s ease-in-out infinite, siteFadeUp .8s var(--ease-ceremony) both .68s; }
+  #site.revealed .site-signature{ animation:siteFadeUp .8s var(--ease-ceremony) both .82s; }
   #site.revealed #site .site-cta,
-  #site.revealed .site-cta{ animation:siteFadeUp .8s var(--ease-ceremony) forwards .96s; }
-  @keyframes siteFadeUp{ to{ opacity:1; transform:translateY(0); } }
+  #site.revealed .site-cta{ animation:siteFadeUp .8s var(--ease-ceremony) both .96s; }
+  @keyframes siteFadeUp{
+    from{ opacity:0; transform:translateY(16px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
 
   @media (prefers-reduced-motion: reduce){
-    .site-mark, .flourish, .tribute-line1, .tribute-line2, .tribute-line3,
-    .site-signature, #site .site-cta{ animation-duration:.01ms !important; }
-    .tribute-line3{ animation:none !important; background-position:0 0; }
+    #site.revealed .site-mark, #site.revealed .flourish, #site.revealed .tribute-line1,
+    #site.revealed .tribute-line2, #site.revealed .tribute-line3,
+    #site.revealed .site-signature, #site.revealed .site-cta{ animation-duration:.01ms !important; }
   }
 
   /* ============================================================
@@ -664,6 +667,8 @@
   htmlEl.classList.add('ceremony-lock');
 
   let opened = false;
+  let finished = false;
+  let fallbackTimer = null;
   let sparkleTimer = null;
   let emberTimer = null;
 
@@ -727,15 +732,26 @@
     loadingRing.hidden = true;
     ceremonyStage.hidden = false;
 
+    // Absolute last resort: if the visitor can never get the interaction
+    // to register at all (an unforeseen browser quirk with pointer events,
+    // getBoundingClientRect, etc.), don't leave them stuck on an
+    // unresponsive ceremony forever — reveal the tribute anyway.
+    window.setTimeout(() => { if (!opened) finishCeremony(); }, 45000);
+
     // Start the scissors clearly above the ribbon (not already touching
     // it) so the ceremony waits for the user to actually bring them down.
     requestAnimationFrame(() => {
-      const start = getRibbonContactPoint();
-      setScissorsPivot(start.x, start.y - 150, 0, 0);
-      void openBtn.offsetWidth;
-      openBtn.classList.add('visible');
-      openBtn.focus();
-      ceremony.addEventListener('pointermove', handlePointerMove);
+      try {
+        const start = getRibbonContactPoint();
+        setScissorsPivot(start.x, start.y - 150, 0, 0);
+        void openBtn.offsetWidth;
+        openBtn.classList.add('visible');
+        openBtn.focus();
+        ceremony.addEventListener('pointermove', handlePointerMove);
+      } catch (err) {
+        // Positioning failed for some reason — still let the visitor in.
+        finishCeremony();
+      }
     });
   }, reduceMotion ? 50 : 1200);
 
@@ -761,6 +777,22 @@
     if (opened || ceremonyStage.hidden) return;
     opened = true;
 
+    // The visual swoop/cut/curtain sequence is a nice-to-have; reaching
+    // the tribute page is not. If anything in it throws on some device
+    // (an unsupported API, an unexpected layout value, etc.) or simply
+    // never gets there, this guarantees the visitor still lands on the
+    // tribute instead of being stuck looking at an unresponsive ceremony.
+    // finishCeremony() itself is idempotent, so this never double-fires
+    // alongside the normal completion path.
+    fallbackTimer = window.setTimeout(finishCeremony, 5000);
+    try {
+      openCeremonySequence();
+    } catch (err) {
+      finishCeremony();
+    }
+  }
+
+  function openCeremonySequence() {
     ceremony.removeEventListener('pointermove', handlePointerMove);
     openBtn.disabled = true;
     announcer.textContent = 'The scissors are swooping in to cut the ribbon…';
@@ -821,6 +853,9 @@
   }
 
   function finishCeremony() {
+    if (finished) return;
+    finished = true;
+    if (fallbackTimer) { window.clearTimeout(fallbackTimer); fallbackTimer = null; }
     if (sparkleTimer) { window.clearInterval(sparkleTimer); sparkleTimer = null; }
 
     ceremony.setAttribute('hidden', '');
