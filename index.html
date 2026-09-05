@@ -117,6 +117,20 @@
       inset 0 0 0 7px rgba(255,255,255,.45),
       inset 0 0 0 8px rgba(184,134,42,.18);
   }
+
+  /* On phones, the plaque becomes a proper full-bleed rectangle that
+     fits the screen edge to edge, instead of a small card floating
+     in a sea of background. */
+  @media (max-width:640px){
+    #site{ padding:12px; }
+    .tribute-card{
+      width:100%;
+      height:100%;
+      max-width:100%;
+      justify-content:space-evenly;
+      border-radius:16px;
+    }
+  }
   .plaque-corner{
     position:absolute;
     width:30px; height:30px;
